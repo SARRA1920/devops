@@ -15,17 +15,17 @@ pipeline {
         
         stage('Build') {
             steps {
-                bat 'mvn clean package -DskipTests'
+                sh 'mvn clean package -DskipTests'  // ✅ sh au lieu de bat
             }
         }
         
         stage('Test') {
             steps {
-                bat 'mvn test'
+                sh 'mvn test'  // ✅ sh au lieu de bat
             }
             post {
                 always {
-                    junit '**/target/surefire-reports/*.xml'  // Publie les résultats des tests
+                    junit '**/target/surefire-reports/*.xml'
                 }
             }
         }
@@ -34,7 +34,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube') {
                     withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                        bat "mvn sonar:sonar -Dsonar.projectKey=MonProjet -Dsonar.login=%SONAR_TOKEN%"
+                        sh "mvn sonar:sonar -Dsonar.projectKey=MonProjet -Dsonar.login=${SONAR_TOKEN}"  // ✅ sh et ${SONAR_TOKEN}
                     }
                 }
             }
