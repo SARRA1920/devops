@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven 3.9.2' // Nom exact de l'installation Maven dans Jenkins
-        jdk 'JDK 17'        // Nom exact de l'installation JDK dans Jenkins
+        maven 'Maven 3.9.2'
+        jdk 'JDK 17'
     }
 
     stages {
@@ -31,11 +31,9 @@ pipeline {
             steps {
                 dir('timesheet-devops') {
                     echo "🔍 Analyse SonarQube"
-                    // Utiliser le nom exact de l'installation SonarQube (sensible à la casse)
                     withSonarQubeEnv('sonarqube') {
                         withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                            sh 'echo "Sonar token available: $SONAR_TOKEN"'
-                            sh "mvn sonar:sonar -Dsonar.projectKey=MonProjet -Dsonar.login=${SONAR_TOKEN}"
+                            sh "mvn sonar:sonar -Dsonar.projectKey=MonProjet -Dsonar.host.url=http://localhost:9000 -Dsonar.login=${SONAR_TOKEN}"
                         }
                     }
                 }
