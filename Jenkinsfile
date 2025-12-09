@@ -1,53 +1,63 @@
 pipeline {
     agent any
-    
+
     tools {
-        maven 'Maven 3.9.2'
-        jdk 'JDK 17'
+        maven 'Maven 3.9.2' // Nom exact de l'installation Maven dans Jenkins
+        jdk 'JDK 17'        // Nom exact de l'installation JDK dans Jenkins
     }
-    
+
     stages {
         stage('Checkout') {
             steps {
+                echo "🔄 Checkout du code depuis Git"
                 git branch: 'main', url: 'https://github.com/SARRA1920/devops.git'
             }
         }
-        
+
         stage('Build') {
             steps {
                 dir('timesheet-devops') {
+                    echo "🛠️ Compilation du projet avec Maven"
+                    sh 'echo JAVA_HOME=$JAVA_HOME'
+                    sh 'java -version'
+                    sh 'echo M2_HOME=$M2_HOME'
+                    sh 'mvn -version'
                     sh 'mvn clean package -DskipTests'
                 }
             }
         }
-        
+
         stage('SonarQube Analysis') {
             steps {
                 dir('timesheet-devops') {
-                    withSonarQubeEnv('SonarQube') {
+                    echo "🔍 Analyse SonarQube"
+                    // Utiliser le nom exact de l'installation SonarQube (sensible à la casse)
+                    withSonarQubeEnv('sonarqube') {
                         withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                            sh 'echo "Sonar token available: $SONAR_TOKEN"'
                             sh "mvn sonar:sonar -Dsonar.projectKey=MonProjet -Dsonar.login=${SONAR_TOKEN}"
                         }
                     }
                 }
             }
         }
-        
+
         stage('Quality Gate') {
             steps {
+                echo "⏳ Vérification du Quality Gate"
                 timeout(time: 5, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
             }
         }
     }
-    
+
     post {
         success {
-            echo 'Pipeline completed successfully! ✅'
+            echo '✅ Pipeline completed successfully!'
         }
         failure {
-            echo 'Pipeline failed! ❌'
+            echo '❌ Pipeline failed!'
         }
     }
 }
