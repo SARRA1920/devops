@@ -15,13 +15,17 @@ pipeline {
         
         stage('Build') {
             steps {
-                sh 'mvn clean package -DskipTests'  // ✅ sh au lieu de bat
+                dir('timesheet-devops') {  // ✅ Navigation dans le sous-dossier
+                    sh 'mvn clean package -DskipTests'
+                }
             }
         }
         
         stage('Test') {
             steps {
-                sh 'mvn test'  // ✅ sh au lieu de bat
+                dir('timesheet-devops') {
+                    sh 'mvn test'
+                }
             }
             post {
                 always {
@@ -32,9 +36,11 @@ pipeline {
         
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQube') {
-                    withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                        sh "mvn sonar:sonar -Dsonar.projectKey=MonProjet -Dsonar.login=${SONAR_TOKEN}"  // ✅ sh et ${SONAR_TOKEN}
+                dir('timesheet-devops') {
+                    withSonarQubeEnv('SonarQube') {
+                        withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                            sh "mvn sonar:sonar -Dsonar.projectKey=MonProjet -Dsonar.login=${SONAR_TOKEN}"
+                        }
                     }
                 }
             }
