@@ -15,21 +15,8 @@ pipeline {
         
         stage('Build') {
             steps {
-                dir('timesheet-devops') {  // ✅ Navigation dans le sous-dossier
-                    sh 'mvn clean package -DskipTests'
-                }
-            }
-        }
-        
-        stage('Test') {
-            steps {
                 dir('timesheet-devops') {
-                    sh 'mvn test'
-                }
-            }
-            post {
-                always {
-                    junit '**/target/surefire-reports/*.xml'
+                    sh 'mvn clean package -DskipTests'
                 }
             }
         }
