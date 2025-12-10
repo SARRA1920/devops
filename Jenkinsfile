@@ -33,7 +33,13 @@ pipeline {
                     echo "🔍 Analyse SonarQube"
                     withSonarQubeEnv('sonarqube') {
                         withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                            sh "mvn sonar:sonar -Dsonar.projectKey=MonProjet -Dsonar.host.url=http://localhost:9000 -Dsonar.login=${SONAR_TOKEN}"
+                            // Single quotes + env.VARIABLE pour sécuriser le token
+                            sh '''
+                                mvn sonar:sonar \
+                                  -Dsonar.projectKey=MonProjet \
+                                  -Dsonar.host.url=http://localhost:9000 \
+                                  -Dsonar.login=$SONAR_TOKEN
+                            '''
                         }
                     }
                 }
@@ -43,7 +49,8 @@ pipeline {
         stage('Quality Gate') {
             steps {
                 echo "⏳ Vérification du Quality Gate"
-                timeout(time: 5, unit: 'MINUTES') {
+                timeout(time: 10, unit: 'MINUTES') {
+                    // Récupération du Quality Gate
                     waitForQualityGate abortPipeline: true
                 }
             }
