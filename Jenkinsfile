@@ -1,11 +1,11 @@
 pipeline {
     agent any
-
+    
     tools {
-        maven 'Maven 3.9.2'
-        jdk 'JDK 17'
+        maven 'M2_HOME'  // ✅ Utilisez le nom que vous avez configuré dans Jenkins
+        jdk 'JAVA_HOME'  // ✅ Utilisez le nom que vous avez configuré dans Jenkins
     }
-
+    
     stages {
         stage('Checkout') {
             steps {
@@ -13,33 +13,27 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/SARRA1920/devops.git'
             }
         }
-
+        
         stage('Build') {
             steps {
                 dir('timesheet-devops') {
                     echo "🛠️ Compilation du projet avec Maven"
-                    sh 'echo JAVA_HOME=$JAVA_HOME'
-                    sh 'java -version'
-                    sh 'echo M2_HOME=$M2_HOME'
-                    sh 'mvn -version'
                     sh 'mvn clean package -DskipTests'
                 }
             }
         }
-
+        
         stage('SonarQube Analysis') {
             steps {
                 dir('timesheet-devops') {
                     echo "🔍 Analyse SonarQube"
-                    withSonarQubeEnv('sonarqube') {
-                        withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                            sh "mvn sonar:sonar -Dsonar.projectKey=MonProjet -Dsonar.host.url=http://localhost:9000 -Dsonar.login=${SONAR_TOKEN}"
-                        }
+                    withSonarQubeEnv('SonarQube') {  // ✅ Utilisez le nom exact de votre serveur SonarQube dans Jenkins
+                        sh 'mvn sonar:sonar -Dsonar.projectKey=MonProjet'
                     }
                 }
             }
         }
-
+        
         stage('Quality Gate') {
             steps {
                 echo "⏳ Vérification du Quality Gate"
@@ -49,7 +43,7 @@ pipeline {
             }
         }
     }
-
+    
     post {
         success {
             echo '✅ Pipeline completed successfully!'
