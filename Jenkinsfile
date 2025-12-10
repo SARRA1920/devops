@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven 3.9.2'
-        jdk 'JDK 17'
+        maven 'M2_HOME'
+        jdk 'JAVA_HOME'
     }
 
     stages {
@@ -43,7 +43,7 @@ pipeline {
                         }
                     }
                 }
-            }
+            }a
         }
 
         stage('Quality Gate') {
