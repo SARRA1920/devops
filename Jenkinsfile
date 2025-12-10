@@ -31,30 +31,16 @@ pipeline {
             steps {
                 dir('timesheet-devops') {
                     echo "🔍 Analyse SonarQube"
-                        // Variante plus explicite avec token (si besoin, facultatif) :
-                        /*
+                    withSonarQubeEnv('sonarqube') {
                         withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                            sh """
-                                mvn clean verify -DskipTests sonar:sonar \
+                            sh '''
+                                mvn sonar:sonar \
                                   -Dsonar.projectKey=MonProjet \
-                                  -Dsonar.host.url=${SONAR_HOST_URL} \
-                                  -Dsonar.token=$SONAR_TOKEN
-                            """
+                                  -Dsonar.host.url=http://localhost:9000 \
+                                  -Dsonar.login=$SONAR_TOKEN
+                            '''
                         }
-                        */
                     }
-                }
-            }
-        }
-
-        // OPTION 2 : garder le Quality Gate, mais UNIQUEMENT si la config Jenkins/SonarQube est OK
-        stage('Quality Gate') {
-            steps {
-                echo "⏳ Vérification du Quality Gate"
-                timeout(time: 10, unit: 'MINUTES') {
-                    // Récupération du Quality Gate
-                    // ATTENTION : ceci nécessite que le serveur 'sonarqube' dans Jenkins ait un token valide
-                    waitForQualityGate abortPipeline: true
                 }
             }
         }
